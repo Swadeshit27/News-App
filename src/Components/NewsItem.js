@@ -3,15 +3,16 @@ import React from "react";
 const NewsItem = (props) => {
   let { title, description, ImgUrl, newsUrl, author, date, source } = props;
   return (
-    <div className="card">
+    <div className="card col-10  col-md-6 col-lg-3 mx-auto p-0 my-4 shadow-sm" style={{width:'20rem', height:'28rem'}} >
       <img
         src={
           !ImgUrl
-            ? "https://images.livemint.com/img/2023/02/16/600x338/oppo_flip_1676521640438_1676521648830_1676521648830.png"
+            ? "https://www.echollywell.co.uk/wp-content/uploads/blank-00cc00_040004000.png"
             : ImgUrl
         }
         className="card-img-top"
         alt="..."
+        style={{maxHeight:"10rem", objectFit:"cover"}}
       />
       <div className="card-body">
         <h5 className="card-title">{title}......</h5>

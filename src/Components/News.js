@@ -3,6 +3,7 @@ import Loading from "./Loading";
 import NewsItem from "./NewsItem";
 import PropTypes from "prop-types";
 import InfiniteScroll from "react-infinite-scroll-component";
+import axios from "axios"
 
 const News = (props) => {
   const camelize = (str) => {
@@ -13,66 +14,49 @@ const News = (props) => {
   const [page, setpage] = useState(1);
   const [totalResults, settotalResults] = useState(0);
 
-  
+
   const update = async () => {
-    props.setProgress(10);
+    props.setProgress(0);
     let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=ba0c019f982f4064b60b68ad3121ade9&page=${page}&pageSize=${props.pageSize}`;
-    setloading(true );
-    let data = await fetch(url);
-    props.setProgress(30);
-    let predata = await data.json();
-    props.setProgress(60);
-    setarticles(predata.articles);
-    settotalResults(predata.totalResults);
+    setloading(true);
+    const res = await axios.get(url);
+    setarticles(res.data.articles);
+    settotalResults(res.data.totalResults);
     setloading(false);
     props.setProgress(100);
   };
+
   useEffect(() => {
     document.title = `${camelize(props.category)} -Apna News `;
     update();
     // eslint-disable-next-line
-  },[])
-  
-  
+  }, [])
 
   const fetchMoreData = async () => {
-    let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=ba0c019f982f4064b60b68ad3121ade9&page=${page+1}&pageSize=${props.pageSize}`;
+    let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.ApiKey}&page=${page + 1}&pageSize=${props.pageSize}`;
+    const res = await axios.get(url);
     setpage(page + 1);
-    let data = await fetch(url);
-    let predata = await data.json();
-    setarticles(articles.concat(predata.articles));
-    settotalResults(predata.totalResults);
+    setarticles(articles.concat(res.data.articles));
+    settotalResults(res.data.totalResults);
     // setloading(false);
   };
-  // handonNext = async () => {
-  //   setState({ page: page + 1 });
-  //   update();
-  // };
-  // handonPre = async () => {
-  //   setState({ page: page - 1 });
-  //   update();
-  // };
 
   return (
     <>
-      <h1 className="mb-3 text-center">Top Latest News</h1>
-      <div className=".container mb-3 text-center">
-        {loading && <Loading />}
-      </div>
- 
+      <h1 className="my-3 text-center">Top Latest News</h1>
       <InfiniteScroll
         dataLength={articles.length}
         next={fetchMoreData}
         hasMore={articles.length !== totalResults}
         loader={<Loading />}
       >
-        <div className="container my-3">
-          <div className="row">
-            {
-              articles.map((element) => {
-                return (
-                  <div className="col-md-3" style={{marginBottom:'5rem'}} key={element.url}>
-                    <NewsItem
+        <div className="col-12 px-4  my-3">
+          {loading ? <Loading /> :
+            <div className="row d-flex justify-between">
+              {
+                articles.map((element) => {
+                  return (
+                    <NewsItem key={element.url}
                       title={element.title ? element.title.slice(0, 45) : ""}
                       description={
                         element.description
@@ -85,33 +69,13 @@ const News = (props) => {
                       date={element.publishedAt}
                       source={element.source.name}
                     />
-                  </div>
-                );
-              })}
-          </div>
+
+                  );
+                })}
+            </div>
+          }
         </div>
       </InfiniteScroll>
-      {/* <div className="container mb-5 d-flex justify-content-between">
-          <button
-            disabled={page <= 1}
-            type="button"
-            className="btn btn-dark "
-            onClick={handonPre}
-          >
-            &larr; Previous
-          </button>
-          <button
-            disabled={
-              page + 1 >
-              Math.ceil(totalPage / props.pageSize)
-            }
-            type="button"
-            className="btn btn-dark d-flex"
-            onClick={handonNext}
-          >
-            Next &rarr;
-          </button>
-        </div> */}
     </>
   );
 };
